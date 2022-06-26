@@ -28,12 +28,12 @@ def extract_gem_info(lines: dict):
 
 def get_level_difference(info_dict, lower_bound=1, upper_bound=21, pattern="", minimum_listed=1):
     differences = {}
-    print(pattern)
     for k, v in info_dict.items():
         if len(re.findall(pattern, k)) > 0:
             if v.get(upper_bound) is None or v.get(lower_bound) is None or v[upper_bound]["listingCount"] < minimum_listed:
                 continue
-            differences[k] = {"profit" : v[upper_bound]["chaosValue"] - v[lower_bound]["chaosValue"], "numListed" : v[upper_bound]["listingCount"]}
+            differences[k] = {"profit" : v[upper_bound]["chaosValue"] - v[lower_bound]["chaosValue"]
+            , "numListed" : v[upper_bound]["listingCount"], "buyinPrice" : v[lower_bound]["chaosValue"], "sellPrice" : v[upper_bound]["chaosValue"]}
     return differences
 
 def do_calculations(league, pattern, start_level, end_level, min_listed, min_profit):
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     parser.add_argument("--pattern", type=str, help="Gem regex to filter by (e.g. Awakened)", default=".*", nargs="?")
     parser.add_argument("--league", type=str, help="Name of League to filter by", default="Sentinel", nargs="?")
     parser.add_argument("--start_level", type=int, help="Gem starting level", default=1)
-    parser.add_argument("--end_level", type=int, help="Gem Ending Level", nargs=1, default=20)
+    parser.add_argument("--end_level", type=int, help="Gem Ending Level", default=20)
     parser.add_argument("--min_listed", type=int, help="Min number of gems listed to display in results", default=1)
     parser.add_argument("--min_profit", type=int, help="Min profit in chaos", default=1)
     args = parser.parse_args()
