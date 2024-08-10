@@ -31,11 +31,14 @@ def extract_gem_info(lines: dict):
 
 
 def get_level_difference(
-    info_dict, lower_bound=1, upper_bound=21, pattern="", minimum_listed=1
+    info_dict, lower_bound=1, upper_bound=21, pattern="", minimum_listed=1, inverse=False
 ):
     differences = {}
+    print(pattern, inverse)
     for k, v in info_dict.items():
-        if len(re.findall(pattern, k)) > 0:
+        matches = re.findall(pattern, k)
+        if (inverse and not len(matches)) or (not inverse and len(matches)):
+            print(k)
             if (
                 v.get(upper_bound) is None
                 or v.get(lower_bound) is None
@@ -53,7 +56,7 @@ def get_level_difference(
     return differences
 
 
-def do_calculations(league, pattern, start_level, end_level, min_listed, min_profit):
+def do_calculations(league, pattern, start_level, end_level, min_listed, min_profit, inverse):
     data = get_gem_data(league)
     info_dict = extract_gem_info(data["lines"])
     diffs = get_level_difference(
@@ -62,6 +65,7 @@ def do_calculations(league, pattern, start_level, end_level, min_listed, min_pro
         upper_bound=end_level,
         pattern=pattern,
         minimum_listed=min_listed,
+        inverse=inverse
     )
     l = sorted(
         filter(lambda tup: tup[1]["profit"] > min_profit, diffs.items()),
@@ -78,6 +82,11 @@ if __name__ == "__main__":
         help="Gem regex to filter by (e.g. Awakened)",
         default=".*",
         nargs="?",
+    )
+    parser.add_argument(
+        "--inverse",
+        "-i",
+        action="store_true"
     )
     parser.add_argument(
         "--league",
@@ -103,5 +112,6 @@ if __name__ == "__main__":
                     args.end_level,
                     args.min_listed,
                     args.min_profit,
+                    args.inverse
                 )
     print(tabulate.tabulate(result, headers="keys"))
